@@ -13,7 +13,7 @@ import numpy as np
 # construct the argument parser and parse the arguments
 ap = argparse.ArgumentParser()
 ap.add_argument("-v", "--video", help="path to the video file")
-ap.add_argument("-a", "--min-area", type=int, default=1000, help="minimum area size")
+ap.add_argument("-a", "--min-area", type=int, default=10000, help="minimum area size") #容忍度
 args = vars(ap.parse_args())
 
 # if the video argument is None, then we are reading from webcam
@@ -105,7 +105,8 @@ while True:
     thresh = cv2.dilate(thresh, None, iterations=2)
     _, cnts,_= cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-    #cnts = imutils.grab_contours(cnts)
+    # 使用会报错误：Contours tuple must have length 2 or 3, otherwise OpenCV changed their cv2.findContours return signature yet again. Refer to OpenCV's documentation in that case
+    # cnts = imutils.grab_contours(cnts)
 
     # loop over the contours
     for c in cnts:
@@ -117,8 +118,10 @@ while True:
         # and update the text
         (x, y, w, h) = cv2.boundingRect(c)
         cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
+        # cv2.imshow("222",frame[y:y+h,x:x+w])
         text = "Occupied"
 
+    # 这里主要是在视频的角写文字
     # draw the text and timestamp on the frame
     cv2.putText(frame, "Monitoring Area Status: {}".format(text), (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
     cv2.putText(frame, datetime.datetime.now().strftime("%A %d %B %Y %I:%M:%S%p"), (10, frame.shape[0] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.35, (0, 0, 255), 1)
@@ -127,6 +130,7 @@ while True:
     cv2.imshow("Security Feed", frame)
     cv2.imshow("Thresh", thresh)
     cv2.imshow("Frame Delta", frameDelta)
+
 
     # save the detection result
     print(text)
